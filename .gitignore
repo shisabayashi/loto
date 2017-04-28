@@ -1,0 +1,12 @@
+*/cache/*
+*/cache/!index.html
+*/cache/!.htaccess
+vendor/
+nbproject/
+composer.lock
+composer.phar
+.idea/
+.phalcon/
+.project
+.settings/
+public/.htaccess
