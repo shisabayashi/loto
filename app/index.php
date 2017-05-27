@@ -118,4 +118,38 @@ $app->get(
     }
 );
 
+$app->get(
+    "/api/event-number-list/type-id/{type_id:[0-9]}",
+    function ($type_id) use ($app, $config) {
+
+        $requestToken = $app->request->getQuery("token");
+        $token = $config->api_token;
+        $generateToken = hash('sha256', $type_id .'-' .$token);
+        if (!($requestToken === $generateToken)) {
+            echo "Unavailable token" .PHP_EOL;
+            return;
+        }
+
+        $phql = "SELECT event_number
+                FROM EventNumberEntity
+                WHERE loto_type_id = :type_id:
+                ORDER BY event_number DESC
+                LIMIT 5";
+        $results = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "type_id" => $type_id,
+            ]
+        );
+
+        $data = [];
+        foreach ($results as $result) {
+            $data['event_number'][] = $result->event_number;
+        }
+
+        //echo json_encode($data);
+        echo "aaa";
+    }
+);
+
 $app->handle();
