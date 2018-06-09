@@ -8,12 +8,28 @@ class LotoTask extends Task
     {
         echo "##### START #####" .PHP_EOL;
 
-        $lotoType = $args[0];
-        $lotoTypeInfo = $this->config->loto_infos->$lotoType;
-        $scrapingInfo = $this->config->scraping_info;
+        $batchType = $args[0];
+        $lotoType  = $args[1];
 
-        $lotteryResult = new LotteryResultBatchService($scrapingInfo);
-        $lotteryResult->lotteryResultRegistration($lotoType, $lotoTypeInfo);
+
+        switch ($batchType) {
+            case 1:
+
+                $lotoTypeInfo = $this->config->loto_infos->config->$lotoType;
+
+                $lotteryResult = new LotteryResultBatchService($lotoTypeInfo);
+                //$lotteryResult->lotteryResultRegistration($lotoType, $lotoTypeInfo);
+                break;
+            case 2:
+
+                $lotoTypeInfo = $this->config->past_loto_infos->$lotoType;
+
+                $lotteryResult = new LotteryResultBatchService($lotoTypeInfo);
+                $lotteryResult->pastInfoRegistration($lotoType);
+                break;
+            default:
+                break;
+        }
 
         echo "##### END #####" .PHP_EOL;
     }

@@ -9,11 +9,13 @@ class LotteryResultRepository
         $this->entity = $enEntity;
     }
 
-    public function saveEventNumber(LotteryResultDto $lotteryDto, $eventNumberId)
+    public function saveEventNumber(LotteryResultDto $lotteryDto)
     {
         return $this->entity->save(
             [
-                "event_number_id" => $eventNumberId,
+                "loto_type_id" => $lotteryDto->getLotoType(),
+                "event_number" => $lotteryDto->getEventNumber(),
+                "loto_date"    => $lotteryDto->getLotoDate(),
                 "loto_numbers"    => $lotteryDto->getLotoNumbers(),
                 "bonus_numbers"   => $lotteryDto->getBonusNumbers(),
             ]

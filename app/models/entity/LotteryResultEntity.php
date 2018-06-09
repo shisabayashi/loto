@@ -7,7 +7,11 @@ class LotteryResultEntity extends Model
 
     protected $id;
 
-    protected $event_number_id;
+    protected $loto_type_id;
+
+    protected $event_number;
+
+    protected $loto_date;
 
     protected $loto_numbers;
 
@@ -43,17 +47,49 @@ class LotteryResultEntity extends Model
     /**
      * @return mixed
      */
-    public function getEventNumberId()
+    public function getLotoTypeId()
     {
-        return $this->event_number_id;
+        return $this->loto_type_id;
     }
 
     /**
-     * @param mixed $event_number_id
+     * @param mixed $loto_type_id
      */
-    public function setEventNumberId($event_number_id)
+    public function setLotoTypeId($loto_type_id)
     {
-        $this->event_number_id = $event_number_id;
+        $this->loto_type_id = $loto_type_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEventNumber()
+    {
+        return $this->event_number;
+    }
+
+    /**
+     * @param mixed $event_number
+     */
+    public function setEventNumber($event_number)
+    {
+        $this->event_number = $event_number;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLotoDate()
+    {
+        return $this->loto_date;
+    }
+
+    /**
+     * @param mixed $loto_date
+     */
+    public function setLotoDate($loto_date)
+    {
+        $this->loto_date = $loto_date;
     }
 
     /**
