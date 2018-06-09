@@ -130,5 +130,5 @@ return new \Phalcon\Config([
             'get_data_count' => "1",
         ],
     ],
-    'api_token' => 'noutenkara_takewari',
+    'api_token' => '',
 ]);
