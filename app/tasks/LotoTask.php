@@ -11,14 +11,14 @@ class LotoTask extends Task
         $batchType = $args[0];
         $lotoType  = $args[1];
 
-
         switch ($batchType) {
             case 1:
 
                 $lotoTypeInfo = $this->config->loto_infos->config->$lotoType;
+                $scrapingInfo = $this->config->loto_infos->scraping_info;
 
                 $lotteryResult = new LotteryResultBatchService($lotoTypeInfo);
-                //$lotteryResult->lotteryResultRegistration($lotoType, $lotoTypeInfo);
+                $lotteryResult->lotteryResultRegistration($lotoType, $scrapingInfo);
                 break;
             case 2:
 

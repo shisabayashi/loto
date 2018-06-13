@@ -19,97 +19,74 @@ class LotteryResultBatchService extends Model
     }
 
 
-//    public function lotteryResultRegistration($lotoType, $lotoTypeInfo)
-//    {
-//
-//        echo 'タイプ: ' .$lotoType .PHP_EOL;
-//
-//        $lotoNumCount  = $lotoTypeInfo['loto_num'];
-//        $bonusNumCount = $lotoTypeInfo['bonus_num'];
-//        $getDataCount  = $lotoTypeInfo['get_data_count'];
-//        $url           = $lotoTypeInfo['url'];
-//
-//        //$HTMLData = file_get_contents($lotoTypeInfo['url']);
-//        $HTMLData = shell_exec('casperjs /home/apu/loto/app/js/loto.js "' .$url .'"');
-//        $phpQueryObj = phpQuery::newDocument($HTMLData);
-//
-////echo "phpQueryObj" .PHP_EOL;
-////echo $phpQueryObj;
-//
-//        for ($tableCount = 0; $tableCount < $getDataCount; $tableCount++) {
-//
-//            $strTableEle = $this->elementReplace($tableCount, $this->tableEle);
-//            $tableObj = $phpQueryObj[$strTableEle];
-//
-////echo $tableObj;
-//
-//            // 回�
-//            $eventNumber = $tableObj->find($this->eventNumEle)->text();
-//            $eventNumber = preg_replace('/[^0-9]/', '', $eventNumber);
-//            echo '回数: ' .$eventNumber .PHP_EOL;
-//
-//            // 日付
-//            $rowDate = $tableObj->find($this->eventDateEle)->text();
-//            $format = 'Y年m月d日';
-//            $lotoDate = DateTime::createFromFormat($format, $rowDate)->format('Y-m-d') ;
-//            echo '日付: ' .$lotoDate .PHP_EOL;
-//
-//            echo "抽せん数字: ";
-//            $lotoNumberArray = array();
-//            for ($i = 0; $i < $lotoNumCount; $i++) {
-//                $strLotoNumEle = $this->elementReplace($i, $this->lotoNumEle);
-//                $lotoNumber    = $tableObj->find($strLotoNumEle)->text();
-//                $lotoNumberArray[] = $lotoNumber;
-//                echo $lotoNumber .' ';
-//            }
-//            echo PHP_EOL;
-//
-//            echo "ボーナス数字: ";
-//            $bonusNumberArray = array();
-//            for ($i = 0; $i < $bonusNumCount; $i++) {
-//                $strBonusNumEle = $this->elementReplace($i, $this->bonusNumEle);
-//                $bonus = $tableObj->find($strBonusNumEle)->text();
-//                $bonusNumberArray[] = preg_replace('/[^0-9]/', '', $bonus);
-//                echo $bonus .' ';
-//            }
-//            echo PHP_EOL;
-//
-//            $lotteryDto = new LotteryResultDto();
-//            $lotteryDto->setEventNumber($eventNumber);
-//            $lotteryDto->setLotoDate($lotoDate);
-//            $lotteryDto->setLotoNumbers(implode(",", $lotoNumberArray));
-//            $lotteryDto->setBonusNumbers(implode(",", $bonusNumberArray));
-//            $lotteryDto->setLotoType($lotoType);
-//
-//            $db = $this->getDI()->get('db');
-//            try {
-//
-//                $db->begin();
-//
-//                $eventNumberRepository = new EventNumberRepository(new EventNumberEntity());
-//                $eventNumberRepository->saveEventNumber($lotteryDto);
-//
-//                $eventNumberResult =$eventNumberRepository->findByEventNumber(
-//                    $lotteryDto->getLotoType(), $lotteryDto->getEventNumber());
-//
-//                if (empty($eventNumberResult)) {
-//                    throw new Exception('ERROR: ## Event Number ID 取得失敗 ##');
-//                }
-//
-//                $lotteryResultrepository = new LotteryResultRepository(new LotteryResultEntity());
-//                $lotteryResultrepository->saveEventNumber($lotteryDto, $eventNumberResult->id);
-//
-//                $db->commit();
-//            } catch (PDOException $e1) {
-//                $db->rollback();
-//                echo $e1->getMessage() .PHP_EOL;
-//            } catch (Exception $e2) {
-//                $db->rollback();
-//                echo $e2->getMessage() .PHP_EOL;
-//            }
-//
-//        }
-//    }
+    public function lotteryResultRegistration($lotoType, $scrapingInfo)
+    {
+        echo 'タイプ: ' .$lotoType .PHP_EOL;
+var_dump($scrapingInfo);
+        $this->tableEle     = $scrapingInfo['table_element'];
+        $this->eventNumEle  = $scrapingInfo['event_number_element'];
+        $this->eventDateEle = $scrapingInfo['event_date_element'];
+        $this->lotoNumEle   = $scrapingInfo['loto_number_element'];
+        $this->bonusNumEle  = $scrapingInfo['bonus_number_element'];
+
+        $lotoNumCount  = $this->lotoTypeInfo['loto_num'];
+        $bonusNumCount = $this->lotoTypeInfo['bonus_num'];
+        $getDataCount  = $this->lotoTypeInfo['get_data_count'];
+        $url           = $this->lotoTypeInfo['url'];
+
+        $HTMLData = shell_exec('casperjs /home/apu/loto/app/js/loto.js "' .$url .'"');
+        $phpQueryObj = phpQuery::newDocument($HTMLData);
+
+//echo $phpQueryObj;
+
+        for ($tableCount = 0; $tableCount < $getDataCount; $tableCount++) {
+
+            $tableObj = $phpQueryObj[$this->tableEle];
+
+//echo $tableObj;
+
+            // 回
+            $eventNumber = pq($tableObj)->find($this->eventNumEle)->text();
+            $eventNumber = preg_replace('/[^0-9]/', '', $eventNumber);
+            echo '回数: ' .$eventNumber .PHP_EOL;
+
+            // 日付
+            $rowDate = $tableObj->find($this->eventDateEle)->text();
+            $format = 'Y年m月d日';
+            $lotoDate = DateTime::createFromFormat($format, $rowDate)->format('Y-m-d') ;
+            echo '日付: ' .$lotoDate .PHP_EOL;
+
+            echo "抽せん数字: ";
+            $lotoNumberArray = array();
+            for ($i = 0; $i < $lotoNumCount; $i++) {
+                $strLotoNumEle = $this->elementReplace($i, $this->lotoNumEle);
+                $lotoNumber    = $tableObj->find($strLotoNumEle)->text();
+                $lotoNumberArray[] = $lotoNumber;
+                echo $lotoNumber .' ';
+            }
+            echo PHP_EOL;
+
+            echo "ボーナス数字: ";
+            $bonusNumberArray = array();
+            for ($i = 0; $i < $bonusNumCount; $i++) {
+                $strBonusNumEle = $this->elementReplace($i, $this->bonusNumEle);
+                $bonus = $tableObj->find($strBonusNumEle)->text();
+                $bonusNumberArray[] = preg_replace('/[^0-9]/', '', $bonus);
+                echo $bonus .' ';
+            }
+            echo PHP_EOL;
+
+            $lotteryDto = new LotteryResultDto();
+            $lotteryDto->setEventNumber($eventNumber);
+            $lotteryDto->setLotoDate($lotoDate);
+            $lotteryDto->setLotoNumbers(implode("", $lotoNumberArray));
+            $lotteryDto->setBonusNumbers(implode("", $bonusNumberArray));
+            $lotteryDto->setLotoType($lotoType);
+
+            $this->insertData($lotteryDto);
+
+        }
+    }
 
     public function pastInfoRegistration($lotoType)
     {
@@ -155,7 +132,7 @@ class LotteryResultBatchService extends Model
             $event_num = sprintf('%03d', $j);
             $url = $this->elementReplace($event_num, $urlBase);
             echo 'url:' .$url .PHP_EOL;
-             $this->crawling1($url, $addCnt);
+            $this->crawling1($url, $addCnt);
         }
     }
 
@@ -163,15 +140,16 @@ class LotteryResultBatchService extends Model
 
         $urlBase  = $lotoConfig['url'];
         $startNum = $lotoConfig['start_num'];
-        $endNum   = $lotoConfig['end_num'];
+        $endNum1  = $lotoConfig['end_num1'];
+        $endNum2  = $lotoConfig['end_num2'];
         $addCnt   = $lotoConfig['add_cnt'];
 
-        for ($j=$startNum; $j<=$endNum; $j=$j+$addCnt) {
+        for ($j=$startNum; $j<=$endNum2; $j=$j+$addCnt) {
 
             $event_num1 = sprintf('%03d', $j);
-            if ($j === 1161) {
-                $event_num2 = sprintf('%03d', $endNum);
-                $addCnt = 18;
+            if ($j === $endNum1) {
+                $event_num2 = sprintf('%03d', $endNum2);
+                $addCnt = ($endNum2 - $endNum1) + 1;
             } else {
                 $event_num2 = sprintf('%03d', ($j + $addCnt) - 1) ;
             }
@@ -249,41 +227,35 @@ class LotteryResultBatchService extends Model
                 echo PHP_EOL;
 
                 echo "ボーナス数字: ";
-                $strBonusNumEle = $this->elementReplace($i, $this->bonusNumEle);
-                $bonus = $tableObj->find($strBonusNumEle)->text();
-                $bonus = preg_replace('/[^0-9]/', '', $bonus);
-                echo $bonus .' ';
-//                $bonusNumberArray = array();
-//                for ($j = 0; $j < $bonusNumCount; $j++) {
-//                    $strBonusNumEle = $this->elementReplace($i, $this->bonusNumEle);
-//                    $bonus = $tableObj->find($strBonusNumEle)->text();
-//                    $bonusNumberArray[] = preg_replace('/[^0-9]/', '', $bonus);
-//                    echo $bonus .' ';
-//                }
+                $bonusNumberArray = array();
+                for ($j = 0; $j < $bonusNumCount; $j++) {
+                    $strBonusNumEle = $this->elementReplace2($i, $j, $this->bonusNumEle);
+                    $bonus = $tableObj->find($strBonusNumEle)->text();
+                    $bonusNumberArray[] = preg_replace('/[^0-9]/', '', $bonus);
+                    echo $bonus .' ';
+                }
                 echo PHP_EOL;
 
+                // set dto
                 $lotteryDto = new LotteryResultDto();
                 $lotteryDto->setEventNumber($eventNumber);
                 $lotteryDto->setLotoDate($lotoDate);
                 $lotteryDto->setLotoNumbers(implode("", $lotoNumberArray));
-//                $lotteryDto->setBonusNumbers(implode(",", $bonusNumberArray));
-                $lotteryDto->setBonusNumbers($bonus);
+                $lotteryDto->setBonusNumbers(implode("", $bonusNumberArray));
                 $lotteryDto->setLotoType($this->lotoType);
 
                 $this->insertData($lotteryDto);
 
-            }
+            } // for end
 
         }
 
     }
 
-
     private function crawling2($url){
 
         $lotoNumCount  = $this->lotoTypeInfo['loto_num'];
         $bonusNumCount = $this->lotoTypeInfo['bonus_num'];
-        $getDataCount  = $this->lotoTypeInfo['get_data_count'];
 
         $HTMLData = shell_exec('casperjs /home/apu/loto/app/js/loto.js "' .$url .'"');
         $phpQueryObj = phpQuery::newDocument($HTMLData);
@@ -313,16 +285,25 @@ class LotteryResultBatchService extends Model
             echo PHP_EOL;
 
             echo "ボーナス数字: ";
-            $bonus = pq($row)->find($this->bonusNumEle)->text();
-            $bonus = preg_replace('/[^0-9]/', '', $bonus);
-            echo $bonus .' ' .PHP_EOL;
+            $bonusNumberArray = array();
+            for ($j = 0; $j < $bonusNumCount; $j++) {
+                $strBonusNumEle = $this->elementReplace($j, $this->bonusNumEle);
+                $bonus = pq($row)->find($strBonusNumEle)->text();
+                $bonus = preg_replace('/[^0-9]/', '', $bonus);
+                $bonusNumberArray[] = $bonus;
+                echo $bonus .' ';
+            }
+            echo PHP_EOL;
+//            $bonus = pq($row)->find($this->bonusNumEle)->text();
+//            $bonus = preg_replace('/[^0-9]/', '', $bonus);
+//            echo $bonus .' ' .PHP_EOL;
 
             $lotteryDto = new LotteryResultDto();
             $lotteryDto->setEventNumber($eventNumber);
             $lotteryDto->setLotoDate($lotoDate);
             $lotteryDto->setLotoNumbers(implode("", $lotoNumberArray));
-//            $lotteryDto->setBonusNumbers(implode(",", $bonusNumberArray));
-            $lotteryDto->setBonusNumbers($bonus);
+            $lotteryDto->setBonusNumbers(implode("", $bonusNumberArray));
+//            $lotteryDto->setBonusNumbers($bonus);
             $lotteryDto->setLotoType($this->lotoType);
 
             $this->insertData($lotteryDto);
