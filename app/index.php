@@ -51,22 +51,70 @@ $app->get(
     "/api/event-number/{event_number:[0-9]+}",
     function ($event_number) use ($app, $config) {
 
+        $type_id = $app->request->getQuery("type_id");
+        $requestToken = $app->request->getQuery("token");
+        $token = $config->api_token;
+        $generateToken = hash('sha256', $event_number .'-' .$token);
+        if (!($requestToken === $generateToken)) {
+            echo "Unavailable token";
+            return;
+        }
+        $phql = "SELECT loto_numbers, bonus_numbers 
+                    FROM LotteryResultEntity
+                    WHERE event_number = :event_number: 
+                    AND loto_type_id = :type_id: ";
+        $results = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "event_number" => $event_number,
+                "type_id"      => $type_id,
+            ]
+        );
         $data = [];
+        foreach ($results as $result) {
+            $data[] = [
+                "loto_numbers"  => $result->loto_numbers,
+                "bonus_numbers" => $result->bonus_numbers,
+            ];
+        }
+
         echo json_encode($data);
     }
 );
 
 $app->get(
-    "/api/event-number-list/type-id/{type_id:[0-9]}",
+    "/api/event-number-list/type_id/{type_id:[0-9]}",
     function ($type_id) use ($app, $config) {
 
+        $requestToken = $app->request->getQuery("token");
+        $token = $config->api_token;
+        $generateToken = hash('sha256', $type_id .'-' .$token);
+        if (!($requestToken === $generateToken)) {
+            echo "Unavailable token" .PHP_EOL;
+            return;
+        }
+        $phql = "SELECT event_number
+                FROM LotteryResultEntity
+                WHERE loto_type_id = :type_id:
+                ORDER BY event_number DESC
+                LIMIT 10";
+        $results = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "type_id" => $type_id,
+            ]
+        );
         $data = [];
+        foreach ($results as $result) {
+            $data['event_number'][] = $result->event_number;
+        }
+
         echo json_encode($data);
     }
 );
 
 $app->get(
-    "/api/create-loto-number/type-id/{type_id:[0-9]}",
+    "/api/create-loto-number/type_id/{type_id:[0-9]}",
     function ($type_id) use ($app, $config) {
 
         $requestToken = $app->request->getQuery("token");
