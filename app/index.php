@@ -72,10 +72,8 @@ $app->get(
         );
         $data = [];
         foreach ($results as $result) {
-            $data[] = [
-                "loto_numbers"  => $result->loto_numbers,
-                "bonus_numbers" => $result->bonus_numbers,
-            ];
+            $data["loto_numbers"] = $result->loto_numbers;
+            $data["bonus_numbers"] = $result->bonus_numbers;
         }
 
         echo json_encode($data);
@@ -184,7 +182,12 @@ $app->get(
 
 //var_dump($lotoNumArray);
 
-        echo json_encode($lotoNumArray);
+        $data = [];
+        foreach ($lotoNumArray as $lval) {
+            $data['loto_number'][] = $lval;
+        }
+
+        echo json_encode($data);
     }
 );
 
