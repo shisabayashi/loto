@@ -59,7 +59,7 @@ $app->get(
             echo "Unavailable token";
             return;
         }
-        $phql = "SELECT loto_numbers, bonus_numbers 
+        $phql = "SELECT loto_numbers, bonus_numbers, loto_date
                     FROM LotteryResultEntity
                     WHERE event_number = :event_number: 
                     AND loto_type_id = :type_id: ";
@@ -74,6 +74,7 @@ $app->get(
         foreach ($results as $result) {
             $data["loto_numbers"] = $result->loto_numbers;
             $data["bonus_numbers"] = $result->bonus_numbers;
+            $data["loto_date"] = $result->loto_date;
         }
 
         echo json_encode($data);
