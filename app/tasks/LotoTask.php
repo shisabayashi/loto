@@ -27,6 +27,16 @@ class LotoTask extends Task
                 $lotteryResult = new LotteryResultBatchService($lotoTypeInfo);
                 $lotteryResult->pastInfoRegistration($lotoType);
                 break;
+            case 3:
+
+                echo 'Number Ranking!!' .PHP_EOL;
+
+                //$lotoTypeInfo = $this->config->past_loto_infos->$lotoType;
+
+                $lotteryResult = new LotteryResultBatchService2();
+                $lotteryResult->updateLotoNumberRanking($lotoType);
+//                $lotteryResult->updateOldLotoNumberRanking($lotoType);
+                break;
             default:
                 break;
         }
