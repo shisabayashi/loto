@@ -1,4 +1,7 @@
 <?php
+ini_set("display_errors", 1);
+error_reporting(E_ALL);
+
 
 use Phalcon\Loader;
 use Phalcon\Mvc\Micro;
@@ -141,10 +144,40 @@ $app->get(
         $maxNum = $config->loto_infos->config->$type_id->max_num;
         $replyCnt = $config->loto_infos->reply_count;
 
+        $monthColumns = [
+            '01' => 'jan01',
+            '02' => 'feb02',
+            '03' => 'mar03',
+            '04' => 'apr04',
+            '05' => 'may05',
+            '06' => 'jun06',
+            '07' => 'jul07',
+            '08' => 'aug08',
+            '09' => 'sep09',
+            '10' => 'oct10',
+            '11' => 'nov11',
+            '12' => 'dec12',
+        ];
+        $monthStr = $monthColumns[substr(date('Ym'), -2)];
+
+        $results = $this->modelsManager->createBuilder()
+            ->columns('loto_number')
+            ->from('NumberRankingEntity')
+            ->where('loto_type_id = :type_id:', ['type_id' => $type_id])
+            ->andWhere($monthStr .
+                ' = (SELECT MAX(' .$monthStr .')  FROM NumberRankingEntity WHERE loto_type_id = ' .$type_id .')')
+            ->getQuery()
+            ->execute();
+
+        $rankArray = [];
+        foreach ($results as $result) {
+            $rankArray[] = $result->loto_number;
+        }
+
         $lotoNumArray = [];
         $loopCnt = 1;
         while(true) {
-            $lotoNumber = implode("", randomNumber($lotoNum, $maxNum, $latestArray));
+            $lotoNumber = implode("", randomNumber($lotoNum, $maxNum, $latestArray, $rankArray));
             if (in_array($lotoNumber, $lotoNumArray) === false) {
                 $lotoNumArray[] = $lotoNumber;
                 $loopCnt++;
@@ -172,7 +205,7 @@ $app->get(
             foreach ($results as $result) {
                 $key = array_search($result->loto_numbers, $lotoNumArray);
                 while(true) {
-                    $lotoNumber = implode("", randomNumber($lotoNum, $maxNum, $latestArray));
+                    $lotoNumber = implode("", randomNumber($lotoNum, $maxNum, $latestArray, $rankArray));
                     if (in_array($lotoNumber, $lotoNumArray) === false) {
                         $lotoNumArray[$key] = $lotoNumber;
                         break 1;
@@ -194,13 +227,20 @@ $app->get(
 
 $app->handle();
 
-function randomNumber($lotoNum, $maxNum, $latestNumArray){
+function randomNumber($lotoNum, $maxNum, $latestNumArray, $rankArray){
 
     $lotoNumArray = [];
     $cnt = 0;
+
     // ランダム数字生成
-    for (;;) {
-        $randNum = sprintf('%02d', rand(1, $maxNum));
+    while (true) {
+        if (!empty($rankArray) && rand(1, 12) === 2) {
+            $rankKey = array_rand($rankArray, 1);
+            $randNum = sprintf('%02d', $rankArray[$rankKey]);
+        } else {
+            $randNum = sprintf('%02d', rand(1, $maxNum));
+        }
+
         if (!in_array($randNum, $lotoNumArray)) {
             $lotoNumArray[] = $randNum;
             $cnt++;
@@ -219,7 +259,7 @@ function randomNumber($lotoNum, $maxNum, $latestNumArray){
         }
         if ($equ === 3){
             echo 'equ' .PHP_EOL;
-            $lotoNumArray = randomNumber($lotoNum, $maxNum, $latestNumArray);
+            $lotoNumArray = randomNumber($lotoNum, $maxNum, $latestNumArray, $rankArray);
         }
     }
 
